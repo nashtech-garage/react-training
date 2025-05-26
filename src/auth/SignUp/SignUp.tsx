@@ -3,6 +3,14 @@ import type { ChangeEvent, FormEvent } from "react";
 import Modal from "../../components/Modal";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
+import {
+  Button,
+  Checkbox,
+  Label,
+  TextInput,
+  Select,
+  Datepicker,
+} from "flowbite-react";
 import useFetch from "../../hooks/useFetch";
 
 interface FormData {
@@ -19,7 +27,11 @@ const schema = yup.object().shape({
     .email("Invalid email format")
     .required("Email is required")
     .test("checkEmailExists", "Email already exists", async (value) => {
-      if (!value) return true;
+      // This is not optimal, but it works. :)
+      if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        // Skip check if email is missing or invalid
+        return true;
+      }
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}p/check-email/${value}`
       );
@@ -34,26 +46,89 @@ const schema = yup.object().shape({
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
     .required("Confirm Password is required"),
-  remember: yup.boolean(),
-  agreeTos: yup
+  remember: yup
     .boolean()
     .oneOf([true], "You must agree to the terms and conditions")
     .required("Agreement to terms is required"),
+  firstName: yup
+    .string()
+    .required("First name is required")
+    .max(50, "First name must be at most 50 characters"),
+  middleName: yup
+    .string()
+    .max(50, "Middle name must be at most 50 characters")
+    .notRequired(),
+  lastName: yup
+    .string()
+    .required("Last name is required")
+    .max(50, "Last name must be at most 50 characters"),
+  gender: yup
+    .string()
+    .required("Gender is required")
+    .oneOf(
+      [
+        "male",
+        "female",
+        "transgender_male",
+        "transgender_female",
+        "non_binary",
+        "genderqueer",
+        "genderfluid",
+        "agender",
+        "bigender",
+        "demiboy",
+        "demigirl",
+        "two_spirit",
+        "pangender",
+        "androgyne",
+        "intersex",
+        "third_gender",
+        "neutrois",
+        "questioning",
+        "other",
+      ],
+      "Invalid gender selection"
+    ),
+  dateOfBirth: yup
+    .string()
+    .required("Date of birth is required")
+    .test("age", "You must be at least 18 years old", (value) => {
+      if (!value) return false;
+      const dob = new Date(value);
+      if (isNaN(dob.getTime())) return false;
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        return age - 1 >= 18;
+      }
+      return age >= 18;
+    }),
 });
 const SignUp = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<any>({
     email: "",
     password: "",
     confirmPassword: "",
     remember: false,
     errors: {},
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    gender: "",
+    dateOfBirth: "",
   });
+
+  //   const { data, loading, error } = useFetch<FormData>(${import.meta.env.VITE_API_URL});
 
   const [openModal, setOpenModal] = useState<boolean>(false);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev: any) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -65,6 +140,10 @@ const SignUp = () => {
     schema
       .validate(formData, { abortEarly: false })
       .then(() => {
+        setFormData((prev: any) => ({
+          ...prev,
+          errors: {},
+        }));
         console.log("Validation successful", formData);
       })
       .catch((err) => {
@@ -74,7 +153,7 @@ const SignUp = () => {
             errors[error.path] = error.message;
           }
         });
-        setFormData((prev) => ({
+        setFormData((prev: typeof formData) => ({
           ...prev,
           errors,
         }));
@@ -96,22 +175,174 @@ const SignUp = () => {
           Create a Free Account {openModal ? " - Terms Accepted" : ""}
         </h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label
+                htmlFor="firstName"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                First name <span className="text-red-600">*</span>
+              </Label>
+              <TextInput
+                type="text"
+                name="firstName"
+                id="firstName"
+                placeholder="Your first name"
+                required
+                value={(formData as any).firstName || ""}
+                onChange={handleChange}
+                color={formData.errors?.firstName ? "failure" : undefined}
+              />
+              {formData.errors?.firstName && (
+                <div className="mt-2">
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {formData.errors.firstName}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <Label
+                htmlFor="middleName"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Middle name
+              </Label>
+              <TextInput
+                type="text"
+                name="middleName"
+                id="middleName"
+                placeholder="Your middle name"
+                value={(formData as any).middleName || ""}
+                onChange={handleChange}
+                color={formData.errors?.middleName ? "failure" : undefined}
+              />
+              {formData.errors?.middleName && (
+                <div className="mt-2">
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {formData.errors.middleName}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <Label
+                htmlFor="lastName"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Last name <span className="text-red-600">*</span>
+              </Label>
+              <TextInput
+                type="text"
+                name="lastName"
+                id="lastName"
+                placeholder="Your last name"
+                required
+                value={(formData as any).lastName || ""}
+                onChange={handleChange}
+                color={formData.errors?.lastName ? "failure" : undefined}
+              />
+              {formData.errors?.lastName && (
+                <div className="mt-2">
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {formData.errors.lastName}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
           <div>
-            <label
+            <Label
+              htmlFor="gender"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Gender <span className="text-red-600">*</span>
+            </Label>
+            <Select
+              id="gender"
+              name="gender"
+              required
+              value={(formData as any).gender || ""}
+              onChange={handleChange}
+              color={formData.errors?.gender ? "failure" : undefined}
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="transgender_male" style={{ color: "#e40303" }}>
+                Transgender Male 🏳️‍🌈
+              </option>
+              <option value="transgender_female" style={{ color: "#ff8c00" }}>
+                Transgender Female 🏳️‍🌈
+              </option>
+              <option value="non_binary" style={{ color: "#ffed00" }}>
+                Non-binary 🏳️‍🌈
+              </option>
+              <option value="genderqueer" style={{ color: "#008026" }}>
+                Genderqueer 🏳️‍🌈
+              </option>
+              <option value="genderfluid" style={{ color: "#004dff" }}>
+                Genderfluid 🏳️‍🌈
+              </option>
+              <option value="agender" style={{ color: "#750787" }}>
+                Agender 🏳️‍🌈
+              </option>
+              <option value="bigender" style={{ color: "#e40303" }}>
+                Bigender 🏳️‍🌈
+              </option>
+              <option value="demiboy" style={{ color: "#ff8c00" }}>
+                Demiboy 🏳️‍🌈
+              </option>
+              <option value="demigirl" style={{ color: "#ffed00" }}>
+                Demigirl 🏳️‍🌈
+              </option>
+              <option value="two_spirit" style={{ color: "#008026" }}>
+                Two-Spirit 🏳️‍🌈
+              </option>
+              <option value="pangender" style={{ color: "#004dff" }}>
+                Pangender 🏳️‍🌈
+              </option>
+              <option value="androgyne" style={{ color: "#750787" }}>
+                Androgyne 🏳️‍🌈
+              </option>
+              <option value="intersex" style={{ color: "#e40303" }}>
+                Intersex 🏳️‍🌈
+              </option>
+              <option value="third_gender" style={{ color: "#ff8c00" }}>
+                Third Gender 🏳️‍🌈
+              </option>
+              <option value="neutrois" style={{ color: "#ffed00" }}>
+                Neutrois 🏳️‍🌈
+              </option>
+              <option value="questioning" style={{ color: "#008026" }}>
+                Questioning 🏳️‍🌈
+              </option>
+              <option value="other">Other</option>
+            </Select>
+            {formData.errors?.gender && (
+              <div className="mt-2">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {formData.errors.gender}
+                </p>
+              </div>
+            )}
+          </div>
+          <div>
+            <Label
               htmlFor="email"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              Your email
-            </label>
-            <input
+              Your email <span className="text-red-600">*</span>
+            </Label>
+            <TextInput
               type="email"
               name="email"
               id="email"
-              className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               placeholder="name@company.com"
               required
               value={formData.email}
               onChange={handleChange}
+              color={formData.errors?.email ? "failure" : undefined}
             />
             {formData.errors?.email && (
               <div className="mt-2">
@@ -122,21 +353,21 @@ const SignUp = () => {
             )}
           </div>
           <div>
-            <label
+            <Label
               htmlFor="password"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              Your password
-            </label>
-            <input
+              Your password <span className="text-red-600">*</span>
+            </Label>
+            <TextInput
               type="password"
               name="password"
               id="password"
               placeholder="••••••••"
-              className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               required
               value={formData.password}
               onChange={handleChange}
+              color={formData.errors?.password ? "failure" : undefined}
             />
             {formData.errors?.password && (
               <div className="mt-2">
@@ -147,21 +378,21 @@ const SignUp = () => {
             )}
           </div>
           <div>
-            <label
+            <Label
               htmlFor="confirmPassword"
               className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >
-              Confirm password
-            </label>
-            <input
+              Confirm password <span className="text-red-600">*</span>
+            </Label>
+            <TextInput
               type="password"
               name="confirmPassword"
               id="confirmPassword"
               placeholder="••••••••"
-              className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               required
               value={formData.confirmPassword}
               onChange={handleChange}
+              color={formData.errors?.confirmPassword ? "failure" : undefined}
             />
             {formData.errors?.confirmPassword && (
               <div className="mt-2">
@@ -171,25 +402,75 @@ const SignUp = () => {
               </div>
             )}
           </div>
+          <div>
+            <Label
+              htmlFor="dateOfBirth"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Date of Birth <span className="text-red-600">*</span>
+            </Label>
+            <Datepicker
+              id="dateOfBirth"
+              name="dateOfBirth"
+              required
+              value={
+                (formData as any).dateOfBirth ||
+                (() => {
+                  // Default: today minus 18 years
+                  const today = new Date();
+                  const eighteenYearsAgo = new Date(
+                    today.getFullYear() - 18,
+                    today.getMonth(),
+                    today.getDate()
+                  );
+                  return eighteenYearsAgo;
+                })()
+              }
+              maxDate={new Date()} // Only allow past dates (up to today)
+              onChange={(date: any) => {
+                let dateString = "";
+                let parsedDate: Date | null = null;
+                if (date) {
+                  if (typeof date === "string") {
+                    parsedDate = new Date(date);
+                  } else if (date instanceof Date) {
+                    parsedDate = date;
+                  }
+                  if (parsedDate && !isNaN(parsedDate.getTime())) {
+                    dateString = parsedDate.toISOString().split("T")[0];
+                  }
+                }
+                setFormData((prev: any) => ({
+                  ...prev,
+                  dateOfBirth: dateString,
+                }));
+              }}
+              color={formData.errors?.dateOfBirth ? "failure" : undefined}
+            />
+            {formData.errors?.dateOfBirth && (
+              <div className="mt-2">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {formData.errors.dateOfBirth}
+                </p>
+              </div>
+            )}
+          </div>
           <div className="flex items-start">
             <div className="flex items-center h-5">
-              <input
+              <Checkbox
                 id="remember"
-                aria-describedby="remember"
                 name="remember"
-                type="checkbox"
-                className="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
                 checked={formData.remember}
                 onChange={handleChange}
               />
             </div>
             <div className="ml-3 text-sm">
-              <label
+              <Label
                 htmlFor="remember"
                 className="font-medium text-gray-900 dark:text-white"
               >
                 I accept the{" "}
-              </label>
+              </Label>
               <a
                 onClick={() => {
                   console.log("Terms clicked");
@@ -202,9 +483,9 @@ const SignUp = () => {
             </div>
           </div>
           <div>
-            {formData.errors?.agreeTos && (
+            {formData.errors?.remember && (
               <p className="text-sm text-red-600 dark:text-red-400 ml-0">
-                {formData.errors.agreeTos}
+                {formData.errors.remember}
               </p>
             )}
           </div>
