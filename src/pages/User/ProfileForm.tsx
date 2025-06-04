@@ -1,117 +1,880 @@
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  Label,
+  TextInput,
+  Button,
+  Select,
+  HRTrimmed,
+} from "flowbite-react";
+import { useStore } from "../../shared";
+import { useNavigate, useParams } from "react-router-dom";
+import Breadcrumb from "../../components/Breadcrumb/index.tsx";
+import UserBasicInfoSection from "../../features/user-profile/components/user-basic/index.tsx";
+import { UserAddressSection } from "../../features/user-profile/components/user-address/index.tsx";
 
-import GeneralSection from './GeneralSection.tsx';
-import { useNavigate, useParams } from 'react-router-dom';
+interface Contacts {
+  country?: string;
+  city?: string;
+  street?: string;
+  postalcode?: string;
+  type?: string;
+}
+
+interface Email {
+  emailaddress: string;
+  type: string;
+  preferred: boolean | string;
+}
+
+interface Phone {
+  phonenumber: string;
+  type: string;
+  preferred: boolean | string;
+}
+
+interface Identification {
+  idtype: string;
+  idexpiry: string;
+  idfile: FileList | string;
+}
+
+interface Occupation {
+  occupation: string;
+  occupationFrom: string;
+  occupationTo?: string;
+}
+
+interface FormData {
+  email: string;
+  firstname: string;
+  middlename?: string;
+  lastname?: string;
+  dateofbirth?: string;
+  age?: number;
+  isofficer?: boolean;
+  country?: string;
+  city?: string;
+  street?: string;
+  postalcode?: string;
+  type?: string;
+  contacts?: Contacts[];
+  emails?: Email[];
+  phones?: Phone[];
+  idtype?: string;
+  idexpiry?: string;
+  idfile?: FileList | string;
+  identifications?: Identification[];
+  occupations?: Occupation[];
+  // Add other fields as needed
+}
 
 const ProfileForm = () => {
-    const navigate = useNavigate();
-    const params = useParams();
-    const {
-        register,
-        handleSubmit,
-        formState: {errors},
-    } = useForm<FormData>();
+  const navigate = useNavigate();
+  const params = useParams();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
 
-    const onSubmit = (data: FormData) => {
-        console.log('Submitted data:', data);
-    };
-    
-    const goToKYC = () => {
-        navigate(`/pages/users/${params.id}/kyc`);
+  const authenticatedData = useStore((state) => state.userData);
+  const isOfficer = authenticatedData?.isofficer || false;
+  const [userData, setUserData] = useState<FormData | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+
+  const onSubmit = (data: FormData) => {
+    console.log("Submitted data:", data);
+  };
+
+  const goToKYC = () => {
+    navigate(`/pages/users/${params.id}/kyc`);
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}u/profile`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log("Fetched user data:", data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
+  };
 
-    return (
-        <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
-            <div className="mb-4 col-span-full xl:mb-2">
-                <nav className="flex mb-5" aria-label="Breadcrumb">
-                    <ol className="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
-                        <li className="inline-flex items-center">
-                            <a href="#"
-                               className="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white">
-                                <svg className="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                                </svg>
-                                Home
-                            </a>
-                        </li>
-                        <li>
-                            <div className="flex items-center">
-                                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                          clip-rule="evenodd"></path>
-                                </svg>
-                                <a href="#"
-                                   className="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 dark:text-gray-300 dark:hover:text-white">Users</a>
-                            </div>
-                        </li>
-                        <li>
-                            <div className="flex items-center">
-                                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd"
-                                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                          clip-rule="evenodd"></path>
-                                </svg>
-                                <span className="ml-1 text-gray-400 md:ml-2 dark:text-gray-500"
-                                      aria-current="page">Personal Information</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-                <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Personal
-                    Information</h1>
-            </div>
-            <div
-                className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-                <div className="items-center sm:flex xl:block 2xl:flex sm:space-x-4 xl:space-x-0 2xl:space-x-4">
-                    <img className="mb-4 rounded-lg w-28 h-28 sm:mb-0 xl:mb-4 2xl:mb-0"
-                         src="/images/users/bonnie-green-2x.png" alt="Jese picture"/>
-                    <div>
-                        <h3 className="mb-1 text-xl font-bold text-gray-900 dark:text-white">Profile
-                            picture</h3>
-                        <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                            JPG, GIF or PNG. Max size of 800K
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <button type="button"
-                                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                <svg className="w-4 h-4 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"></path>
-                                    <path d="M9 13h2v5a1 1 0 11-2 0v-5z"></path>
-                                </svg>
-                                Upload picture
-                            </button>
-                            <button type="button"
-                                    className="py-2 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                                Delete
-                            </button>
-                        </div>
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  return (
+    <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
+      <div className="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb
+          items={[
+            { label: "Users", href: "/pages/users" },
+            { label: "Profile", href: `/pages/users/${params.id}` },
+          ]}
+        />
+        <form className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2 justify-between align-center">
+            <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white inline-flex self-center">
+              Personal Information
+            </h1>
+            {!isOfficer && (
+              <div className="flex items-center gap-2">
+                <Button
+                  pill
+                  color="alternative"
+                  className="bg-primary-700"
+                  onClick={() => setIsEdit(!isEdit)}
+                >
+                  {isEdit ? "Cancel" : "Edit"}
+                </Button>
+                <Button pill color="alternative">
+                  KYC
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <UserBasicInfoSection
+            userData={userData ?? {}}
+            isEdit={isEdit}
+            register={register}
+          />
+          <UserAddressSection
+            contacts={userData?.contacts || []}
+            isEdit={isEdit}
+            register={register}
+            setUserData={setUserData}
+          />
+          {/* <Card className="my-3">
+            <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
+              Address
+            </h5>
+            {userData?.contacts?.map((contact: Contacts, index: number) => (
+              <div key={index}>
+                {index > 0 && <HRTrimmed />}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`country-${index}`}>
+                        Country <span className="text-red-600">*</span>
+                      </Label>
                     </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`country-${index}`}
+                        type="text"
+                        placeholder="Country"
+                        required={true}
+                        defaultValue={contact.country || ""}
+                        {...register(`contacts.${index}.country` as const, {
+                          required: true,
+                        })}
+                      />
+                    ) : (
+                      <Label
+                        htmlFor={`country-${index}`}
+                        className="font-normal"
+                      >
+                        {contact.country || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`city-${index}`}>
+                        City <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`city-${index}`}
+                        type="text"
+                        placeholder="City"
+                        defaultValue={contact.city || ""}
+                        {...(register(`contacts.${index}.city` as const),
+                        {
+                          required: true,
+                        })}
+                      />
+                    ) : (
+                      <Label htmlFor={`city-${index}`} className="font-normal">
+                        {contact.city || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`street-${index}`}>
+                        Street <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`street-${index}`}
+                        type="text"
+                        placeholder="Street"
+                        defaultValue={contact.street || ""}
+                        {...(register(`contacts.${index}.street` as const),
+                        {
+                          required: true,
+                        })}
+                      />
+                    ) : (
+                      <Label
+                        htmlFor={`street-${index}`}
+                        className="font-normal"
+                      >
+                        {contact.street || ""}
+                      </Label>
+                    )}
+                  </div>
                 </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`postalcode-${index}`}>Postal Code</Label>
+                    </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`postalcode-${index}`}
+                        type="text"
+                        placeholder="Postal Code"
+                        defaultValue={contact.postalcode || ""}
+                        {...register(`contacts.${index}.postalcode` as const)}
+                      />
+                    ) : (
+                      <Label
+                        htmlFor={`postalcode-${index}`}
+                        className="font-normal"
+                      >
+                        {contact.postalcode || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-2">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`type-${index}`}>
+                        Type <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <Select
+                        className="w-sm"
+                        id={`type-${index}`}
+                        {...(register(`contacts.${index}.type` as const),
+                        {
+                          required: true,
+                        })}
+                        defaultValue={
+                          contact.type === "Work"
+                            ? "1"
+                            : contact.type === "Mailing"
+                            ? "0"
+                            : contact.type || ""
+                        }
+                      >
+                        <option value="">Select type</option>
+                        <option value="0">Mailing</option>
+                        <option value="1">Work</option>
+                      </Select>
+                    ) : (
+                      <Label htmlFor={`type-${index}`} className="font-normal">
+                        {contact.type === "1"
+                          ? "Work"
+                          : contact.type === "0"
+                          ? "Mailing"
+                          : contact.type || ""}
+                      </Label>
+                    )}
+                  </div>
+                </div>
+                <div className="flex mt-3">
+                  <Button color="red">Delete</Button>
+                </div>
+              </div>
+            ))}
+            {isEdit && (
+              <div className="flex justify-end mt-4">
+                <Button
+                  disabled={(userData?.contacts?.length ?? 0) >= 5}
+                  pill
+                  color="green"
+                  type="button"
+                  onClick={() => {
+                    setUserData((prev) => {
+                      if ((prev?.contacts?.length ?? 0) >= 5) return prev;
+                      const base = prev ?? {
+                        email: "",
+                        firstname: "",
+                        contacts: [],
+                      };
+                      return {
+                        ...base,
+                        contacts: [
+                          ...(base.contacts || []),
+                          {
+                            country: "",
+                            city: "",
+                            street: "",
+                            postalcode: "",
+                            type: "",
+                          },
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  Add Address
+                </Button>
+              </div>
+            )}
+          </Card> */}
+          {/* <Card className="my-3">
+            <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
+              Emails
+            </h5>
+            {userData?.emails?.map?.((emailObj: any, index: number) => (
+              <div key={index}>
+                {index > 0 && <HRTrimmed />}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`emailaddress-${index}`}>
+                        Email Address <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`emailaddress-${index}`}
+                        type="email"
+                        placeholder="example@email.com"
+                        required
+                        defaultValue={emailObj.emailaddress || ""}
+                        {...register(`emails.${index}.emailaddress` as const)}
+                      />
+                    ) : (
+                      <Label
+                        htmlFor={`emailaddress-${index}`}
+                        className="font-normal"
+                      >
+                        {emailObj.emailaddress || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`type-email-${index}`}>
+                        Type <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <Select
+                        id={`type-email-${index}`}
+                        required
+                        {...register(`emails.${index}.type` as const)}
+                        defaultValue={
+                          emailObj.type === "Work"
+                            ? "1"
+                            : emailObj.type === "Personal"
+                            ? "0"
+                            : emailObj.type || ""
+                        }
+                      >
+                        <option value="">Select type</option>
+                        <option value="0">Personal</option>
+                        <option value="1">Work</option>
+                      </Select>
+                    ) : (
+                      <Label
+                        htmlFor={`type-email-${index}`}
+                        className="font-normal"
+                      >
+                        {emailObj.type || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`preferred-${index}`}>
+                        Preferred <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <Select
+                        id={`preferred-${index}`}
+                        required
+                        {...register(`emails.${index}.preferred` as const)}
+                        defaultValue={
+                          emailObj.preferred === true ||
+                          emailObj.preferred === "true"
+                            ? "true"
+                            : "false"
+                        }
+                      >
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </Select>
+                    ) : (
+                      <Label
+                        htmlFor={`preferred-${index}`}
+                        className="font-normal"
+                      >
+                        {emailObj.preferred === true ||
+                        emailObj.preferred === "true"
+                          ? "Yes"
+                          : "No"}
+                      </Label>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {isEdit && (
+              <div className="flex justify-end mt-4">
+                <Button
+                  disabled={(userData?.emails?.length ?? 0) >= 5}
+                  pill
+                  color="green"
+                  type="button"
+                  onClick={() => {
+                    setUserData((prev) => {
+                      if ((prev?.emails?.length ?? 0) >= 5) return prev;
+                      const base = prev ?? {
+                        email: "",
+                        firstname: "",
+                        emails: [],
+                      };
+                      return {
+                        ...base,
+                        emails: [
+                          ...(base.emails || []),
+                          {
+                            emailaddress: "",
+                            type: "",
+                            preferred: "false",
+                          },
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  Add Email
+                </Button>
+              </div>
+            )}
+          </Card>
+          <Card className="my-3">
+            <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
+              Phones
+            </h5>
+            {userData?.phones?.map?.((phoneObj: any, index: number) => (
+              <div key={index}>
+                {index > 0 && <HRTrimmed />}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`phonenumber-${index}`}>
+                        Phone Number <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <TextInput
+                        id={`phonenumber-${index}`}
+                        type="tel"
+                        placeholder="Phone Number"
+                        required
+                        defaultValue={phoneObj.phonenumber || ""}
+                        {...register(`phones.${index}.phonenumber` as const)}
+                      />
+                    ) : (
+                      <Label
+                        htmlFor={`phonenumber-${index}`}
+                        className="font-normal"
+                      >
+                        {phoneObj.phonenumber || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`type-phone-${index}`}>
+                        Type <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <Select
+                        id={`type-phone-${index}`}
+                        required
+                        {...register(`phones.${index}.type` as const)}
+                        defaultValue={
+                          phoneObj.type === "Work"
+                            ? "1"
+                            : phoneObj.type === "Personal"
+                            ? "0"
+                            : phoneObj.type || ""
+                        }
+                      >
+                        <option value="">Select type</option>
+                        <option value="0">Personal</option>
+                        <option value="1">Work</option>
+                      </Select>
+                    ) : (
+                      <Label
+                        htmlFor={`type-phone-${index}`}
+                        className="font-normal"
+                      >
+                        {phoneObj.type || ""}
+                      </Label>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="mb-2 block">
+                      <Label htmlFor={`preferred-phone-${index}`}>
+                        Preferred <span className="text-red-600">*</span>
+                      </Label>
+                    </div>
+                    {isEdit ? (
+                      <Select
+                        id={`preferred-phone-${index}`}
+                        required
+                        {...register(`phones.${index}.preferred` as const)}
+                        defaultValue={
+                          phoneObj.preferred === true ||
+                          phoneObj.preferred === "true"
+                            ? "true"
+                            : "false"
+                        }
+                      >
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </Select>
+                    ) : (
+                      <Label
+                        htmlFor={`preferred-phone-${index}`}
+                        className="font-normal"
+                      >
+                        {phoneObj.preferred === true ||
+                        phoneObj.preferred === "true"
+                          ? "Yes"
+                          : "No"}
+                      </Label>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {isEdit && (
+              <div className="flex justify-end mt-4">
+                <Button
+                  disabled={(userData?.phones?.length ?? 0) >= 5}
+                  pill
+                  color="green"
+                  type="button"
+                  onClick={() => {
+                    setUserData((prev) => {
+                      if ((prev?.phones?.length ?? 0) >= 5) return prev;
+                      const base = prev ?? {
+                        email: "",
+                        firstname: "",
+                        phones: [],
+                      };
+                      return {
+                        ...base,
+                        phones: [
+                          ...(base.phones || []),
+                          {
+                            phonenumber: "",
+                            type: "",
+                            preferred: "false",
+                          },
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  Add Phone
+                </Button>
+              </div>
+            )}
+          </Card>
+          <Card className="my-3">
+            <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
+              Identification Documents
+            </h5>
+            {userData?.identifications?.map?.((ident: any, index: number) => (
+              <div key={index} className="flex gap-4 mb-4">
+                <div className="flex-1">
+                  <div className="mb-2 block">
+                    <Label htmlFor={`idtype-${index}`}>
+                      Type <span className="text-red-600">*</span>
+                    </Label>
+                  </div>
+                  {isEdit ? (
+                    <Select
+                      id={`idtype-${index}`}
+                      required
+                      {...register(`identifications.${index}.idtype` as const, {
+                        required: true,
+                      })}
+                      defaultValue={ident.idtype || ""}
+                    >
+                      <option value="">Select type</option>
+                      <option value="passport">Passport</option>
+                      <option value="driver_license">Driver License</option>
+                      <option value="national_id">National ID</option>
+                    </Select>
+                  ) : (
+                    <Label htmlFor={`idtype-${index}`} className="font-normal">
+                      {ident.idtype || ""}
+                    </Label>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="mb-2 block">
+                    <Label htmlFor={`idexpiry-${index}`}>
+                      Expiry Date <span className="text-red-600">*</span>
+                    </Label>
+                  </div>
+                  {isEdit ? (
+                    <TextInput
+                      id={`idexpiry-${index}`}
+                      type="date"
+                      required
+                      defaultValue={ident.idexpiry || ""}
+                      {...register(
+                        `identifications.${index}.idexpiry` as const,
+                        { required: true }
+                      )}
+                    />
+                  ) : (
+                    <Label
+                      htmlFor={`idexpiry-${index}`}
+                      className="font-normal"
+                    >
+                      {ident.idexpiry || ""}
+                    </Label>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="mb-2 block">
+                    <Label htmlFor={`idfile-${index}`}>
+                      Upload Document <span className="text-red-600">*</span>
+                    </Label>
+                  </div>
+                  {isEdit ? (
+                    <TextInput
+                      id={`idfile-${index}`}
+                      type="file"
+                      required
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      {...register(`identifications.${index}.idfile` as const, {
+                        required: true,
+                      })}
+                    />
+                  ) : (
+                    <Label htmlFor={`idfile-${index}`} className="font-normal">
+                      {ident.idfile ? "Document Uploaded" : ""}
+                    </Label>
+                  )}
+                </div>
+              </div>
+            ))}
+            {isEdit && (
+              <div className="flex justify-end mt-2">
+                <Button
+                  disabled={(userData?.identifications?.length ?? 0) >= 5}
+                  pill
+                  color="green"
+                  type="button"
+                  onClick={() => {
+                    setUserData((prev) => {
+                      if ((prev?.identifications?.length ?? 0) >= 5)
+                        return prev;
+                      const base = prev ?? {
+                        email: "",
+                        firstname: "",
+                        identifications: [],
+                      };
+                      return {
+                        ...base,
+                        identifications: [
+                          ...(base.identifications || []),
+                          {
+                            idtype: "",
+                            idexpiry: "",
+                            idfile: "",
+                          },
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  Add Identification
+                </Button>
+              </div>
+            )}
+          </Card>
+          <Card className="my-3">
+            <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
+              Occupation
+            </h5>
+            {userData?.occupations?.map?.(
+              (occupationObj: any, index: number) => (
+                <div key={index}>
+                  {index > 0 && <HRTrimmed />}
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <div className="mb-2 block">
+                        <Label htmlFor={`occupation-${index}`}>
+                          Occupation <span className="text-red-600">*</span>
+                        </Label>
+                      </div>
+                      {isEdit ? (
+                        <Select
+                          id={`occupation-${index}`}
+                          required
+                          {...register(
+                            `occupations.${index}.occupation` as const,
+                            { required: true }
+                          )}
+                          defaultValue={occupationObj.occupation || ""}
+                        >
+                          <option value="">Select occupation</option>
+                          <option value="student">Student</option>
+                          <option value="engineer">Engineer</option>
+                          <option value="teacher">Teacher</option>
+                          <option value="doctor">Doctor</option>
+                          <option value="business">Business</option>
+                          <option value="other">Other</option>
+                        </Select>
+                      ) : (
+                        <Label
+                          htmlFor={`occupation-${index}`}
+                          className="font-normal"
+                        >
+                          {occupationObj.occupation || ""}
+                        </Label>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-2 block">
+                        <Label htmlFor={`occupationFrom-${index}`}>
+                          From Date <span className="text-red-600">*</span>
+                        </Label>
+                      </div>
+                      {isEdit ? (
+                        <TextInput
+                          id={`occupationFrom-${index}`}
+                          type="date"
+                          required
+                          defaultValue={occupationObj.occupationFrom || ""}
+                          {...register(
+                            `occupations.${index}.occupationFrom` as const,
+                            { required: true }
+                          )}
+                        />
+                      ) : (
+                        <Label
+                          htmlFor={`occupationFrom-${index}`}
+                          className="font-normal"
+                        >
+                          {occupationObj.occupationFrom || ""}
+                        </Label>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-2 block">
+                        <Label htmlFor={`occupationTo-${index}`}>To Date</Label>
+                      </div>
+                      {isEdit ? (
+                        <TextInput
+                          id={`occupationTo-${index}`}
+                          type="date"
+                          defaultValue={occupationObj.occupationTo || ""}
+                          {...register(
+                            `occupations.${index}.occupationTo` as const
+                          )}
+                        />
+                      ) : (
+                        <Label
+                          htmlFor={`occupationTo-${index}`}
+                          className="font-normal"
+                        >
+                          {occupationObj.occupationTo || ""}
+                        </Label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+            {isEdit && (
+              <div className="flex justify-end mt-4">
+                <Button
+                  disabled={(userData?.occupations?.length ?? 0) >= 5}
+                  pill
+                  color="green"
+                  type="button"
+                  onClick={() => {
+                    setUserData((prev) => {
+                      if ((prev?.occupations?.length ?? 0) >= 5) return prev;
+                      const base = prev ?? {
+                        email: "",
+                        firstname: "",
+                        occupations: [],
+                      };
+                      return {
+                        ...base,
+                        occupations: [
+                          ...(base.occupations || []),
+                          {
+                            occupation: "",
+                            occupationFrom: "",
+                            occupationTo: "",
+                          },
+                        ],
+                      };
+                    });
+                  }}
+                >
+                  Add Occupation
+                </Button>
+              </div>
+            )}
+          </Card>
+          */}
+          {isEdit && (
+            <div className="flex justify-end mt-4 gap-2">
+              <Button
+                pill
+                color="alternative"
+                type="submit"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Cancel
+              </Button>
+              <Button
+                pill
+                color="green"
+                type="submit"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Save
+              </Button>
             </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                <GeneralSection register={register} errors={errors}/>
-
-                <div className="col-span-6 sm:col-full">
-                    <button
-                        className="text-white bg-blue-400 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                        type="submit">Submit
-                    </button>
-                    <button onClick={goToKYC}
-                        className="ml-1 text-white bg-blue-400  hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                        type="button">KYC
-                    </button>
-                </div>
-            </form>
-        </div>
-    )
-}
+          )}
+        </form>
+      </div>
+    </div>
+  );
+};
 
 export default ProfileForm;

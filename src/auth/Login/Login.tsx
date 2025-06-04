@@ -5,6 +5,7 @@ import { Alert } from "flowbite-react";
 import { MdError } from "react-icons/md";
 import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
+import { useStore } from "../../shared";
 
 const initialState = {
   values: { email: "", password: "" },
@@ -14,12 +15,14 @@ const initialState = {
 const Login = () => {
   const navigate = useNavigate();
   const [state, formAction, isPending] = useActionState(doLogin, initialState);
+  const addUserData = useStore((state) => state.setUserData);
 
   useEffect(() => {
     if (state.isValid) {
       const redirectTo = new URLSearchParams(window.location.search).get(
         "redirectTo"
       );
+      addUserData(state.values)
       const navigateTo = redirectTo ? redirectTo : "/pages";
       navigate(navigateTo);
     }

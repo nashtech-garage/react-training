@@ -3,23 +3,8 @@ import type { ChangeEvent, FormEvent } from "react";
 import Modal from "../../components/Modal";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
-import {
-  Button,
-  Checkbox,
-  Label,
-  TextInput,
-  Select,
-  Datepicker,
-} from "flowbite-react";
-import useFetch from "../../hooks/useFetch";
-
-interface FormData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  remember: boolean;
-  errors: Record<string, string>;
-}
+import { Checkbox, Label, TextInput, Select, Datepicker } from "flowbite-react";
+import { useNavigate } from "react-router-dom";
 
 const schema = yup.object().shape({
   email: yup
@@ -119,9 +104,8 @@ const SignUp = () => {
     dateOfBirth: "",
   });
 
-  //   const { data, loading, error } = useFetch<FormData>(${import.meta.env.VITE_API_URL});
-
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -144,6 +128,63 @@ const SignUp = () => {
           ...prev,
           errors: {},
         }));
+
+        fetch(`${import.meta.env.VITE_API_URL}users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            middleName: formData.middleName,
+            lastName: formData.lastName,
+            gender: formData.gender,
+            dateOfBirth: formData.dateOfBirth,
+          }),
+        })
+          .then(async (res) => {
+            console.log(res.ok);
+            if (!res.ok) {
+              const errorData = await res.json();
+              console.log(errorData);
+              throw new Error(
+                JSON.stringify(errorData) || "Failed to create user"
+              );
+            }
+            return res.json();
+          })
+          .then((data) => {
+            // Handle success (e.g., redirect, show message, etc.)
+            alert("Account created successfully!");
+            navigate("/auth/login");
+          })
+          .catch((errorData) => {
+            errorData = JSON.parse(errorData.message || "{}");
+            console.error("Error creating account:", errorData);
+            // If the error response contains field errors, map them to formData.errors
+            console.log(errorData);
+            if (errorData && Array.isArray(errorData.errors)) {
+              const apiErrors: Record<string, string> = {};
+              errorData.errors.forEach(
+                (err: { field: string; message: string }) => {
+                  if (err.field && err.message) {
+                    apiErrors[err.field] = err.message;
+                  }
+                }
+              );
+              setFormData((prev: any) => ({
+                ...prev,
+                errors: { ...prev.errors, ...apiErrors },
+              }));
+            } else {
+              setFormData((prev: any) => ({
+                ...prev,
+                errors: { ...prev.errors, api: errorData.message },
+              }));
+            }
+          });
         console.log("Validation successful", formData);
       })
       .catch((err) => {
