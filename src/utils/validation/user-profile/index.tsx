@@ -64,7 +64,7 @@ export const emailValidationSchema = yup.object().shape({
 });
 
 export const phoneValidationSchema = yup.object().shape({
-  phone: yup
+  number: yup
     .string()
     .matches(/^\d{1,12}$/, "Phone must be a number and less than 12 digits")
     .required("Phone is required"),

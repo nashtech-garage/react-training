@@ -3,14 +3,7 @@ import { Card, Label, TextInput, Select, Button, HR } from "flowbite-react"; // 
 import { useFieldArray } from "react-hook-form";
 import type { UseFormRegister } from "react-hook-form";
 
-interface Phone {
-  phone: string;
-  type: string;
-  preferred: string | boolean;
-}
-
 interface UserPhonesProps {
-  phones?: any[];
   isEdit: boolean;
   register: UseFormRegister<FormData>;
   control: any;
@@ -18,7 +11,6 @@ interface UserPhonesProps {
 }
 
 const UserPhones: React.FC<UserPhonesProps> = ({
-  phones,
   isEdit,
   register,
   control,
@@ -26,8 +18,9 @@ const UserPhones: React.FC<UserPhonesProps> = ({
 }) => {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "phones",
+    name: "numbers",
   });
+  console.log(fields);
   return (
     <Card className="my-3">
       <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
@@ -37,7 +30,7 @@ const UserPhones: React.FC<UserPhonesProps> = ({
         <div className="text-gray-500">No phones available.</div>
       )}
       {(fields ?? []).map((field, index: number) => {
-        const phone = phones?.[index] || {};
+        const phone = field || {};
         return (
           <div key={index}>
             {index > 0 && <HR />}
@@ -55,19 +48,19 @@ const UserPhones: React.FC<UserPhonesProps> = ({
                       type="tel"
                       placeholder="Phone Number"
                       required
-                      defaultValue={phone.phone || ""}
-                      {...register(`phones.${index}.phone` as const)}
-                      color={errors?.[index]?.phone ? "failure" : undefined}
+                      defaultValue={phone.number || ""}
+                      {...register(`phones.${index}.number` as const)}
+                      color={errors?.[index]?.number ? "failure" : undefined}
                     />
-                    {errors?.[index]?.phone && (
+                    {errors?.[index]?.number && (
                       <Label className="text-red-600 text-sm mt-1">
-                        {errors?.[index].phone.message}
+                        {errors?.[index].number.message}
                       </Label>
                     )}
                   </>
                 ) : (
                   <Label htmlFor={`phone-${index}`} className="font-normal">
-                    {phone.phone || ""}
+                    {phone.number || ""}
                   </Label>
                 )}
               </div>
@@ -83,13 +76,7 @@ const UserPhones: React.FC<UserPhonesProps> = ({
                       id={`type-phone-${index}`}
                       required
                       {...register(`phones.${index}.type` as const)}
-                      defaultValue={
-                        phone.type === "Work"
-                          ? "1"
-                          : phone.type === "Personal"
-                          ? "0"
-                          : phone.type || ""
-                      }
+                      defaultValue={phone.type}
                       color={errors?.[index]?.type ? "failure" : undefined}
                     >
                       <option value="">Select type</option>
@@ -107,7 +94,7 @@ const UserPhones: React.FC<UserPhonesProps> = ({
                     htmlFor={`type-phone-${index}`}
                     className="font-normal"
                   >
-                    {phone.type || ""}
+                    {phone.type == 1 ? "Work" : "Personal" || ""}
                   </Label>
                 )}
               </div>
@@ -123,15 +110,11 @@ const UserPhones: React.FC<UserPhonesProps> = ({
                       id={`preferred-phone-${index}`}
                       required
                       {...register(`phones.${index}.preferred` as const)}
-                      defaultValue={
-                        phone.preferred === true || phone.preferred === "true"
-                          ? "true"
-                          : "false"
-                      }
+                      defaultValue={phone.preferred}
                       color={errors?.[index]?.preferred ? "failure" : undefined}
                     >
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
+                      <option value="1">Yes</option>
+                      <option value="0">No</option>
                     </Select>
                     {errors?.[index]?.preferred && (
                       <Label className="text-red-600 text-sm mt-1">
@@ -144,7 +127,7 @@ const UserPhones: React.FC<UserPhonesProps> = ({
                     htmlFor={`preferred-phone-${index}`}
                     className="font-normal"
                   >
-                    {phone.preferred === true || phone.preferred === "true"
+                    {phone.preferred === 1 || phone.preferred === "1"
                       ? "Yes"
                       : "No"}
                   </Label>
@@ -168,7 +151,7 @@ const UserPhones: React.FC<UserPhonesProps> = ({
             onClick={(e) => {
               e.preventDefault();
               append({
-                phone: "",
+                number: "",
                 type: "",
                 preferred: "false",
               });

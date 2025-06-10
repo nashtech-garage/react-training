@@ -20,13 +20,11 @@ interface UserAddressSectionProps {
   userData: FormData;
   isEdit: boolean;
   register: UseFormRegister<FormData>;
-  contacts?: Contacts[];
   control: any;
   errors: any;
 }
 
 const UserAddressSection: React.FC<UserAddressSectionProps> = ({
-  contacts,
   isEdit,
   register,
   control,
@@ -46,7 +44,7 @@ const UserAddressSection: React.FC<UserAddressSectionProps> = ({
         <div className="text-gray-500">No addresses available.</div>
       )}
       {(fields ?? []).map((field, index: number) => {
-        const contact = contacts?.[index] || {};
+        const contact = field || {};
         return (
           <div key={index}>
             {index > 0 && <HR />}

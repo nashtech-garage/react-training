@@ -43,7 +43,7 @@ interface Email {
 }
 
 interface Phone {
-  phonenumber: string;
+  number: string;
   type: string;
   preferred: boolean | string;
 }
@@ -197,14 +197,12 @@ const ProfileForm = () => {
             isLoading={isLoading}
           />
           <UserAddressSection
-            contacts={userData?.contacts || []}
             isEdit={isEdit}
             register={register}
             control={control}
             errors={errors.contacts || {}}
           />
           <UserEmails
-            emails={userData?.emails || []}
             isEdit={isEdit}
             register={register}
             control={control}
@@ -212,7 +210,6 @@ const ProfileForm = () => {
           />
 
           <UserPhones
-            phones={userData?.phones || []}
             isEdit={isEdit}
             register={register}
             control={control}
@@ -228,7 +225,6 @@ const ProfileForm = () => {
           />
 
           <UserOccupation
-            occupations={userData?.occupations || []}
             isEdit={isEdit}
             register={register}
             control={control}

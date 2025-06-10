@@ -1,5 +1,13 @@
 import React from "react";
-import { Card, Label, TextInput, Select, Button, HR } from "flowbite-react"; // Replace with your actual imports
+import {
+  Card,
+  Label,
+  TextInput,
+  Select,
+  Button,
+  HR,
+  Datepicker,
+} from "flowbite-react"; // Replace with your actual imports
 import { useFieldArray } from "react-hook-form";
 import type { UseFormRegister } from "react-hook-form";
 
@@ -12,13 +20,30 @@ interface Occupation {
 interface UserOccupationProps {
   isEdit: boolean;
   register: UseFormRegister<FormData>;
-  occupations?: any[];
   control: any;
   errors: any;
 }
 
+const formatDateString = (date) => {
+  let dateString = "";
+  let parsedDate: Date | null = null;
+  if (date) {
+    if (typeof date === "string") {
+      parsedDate = new Date(date);
+    } else if (date instanceof Date) {
+      parsedDate = date;
+    }
+    if (parsedDate && !isNaN(parsedDate.getTime())) {
+      dateString = parsedDate.toISOString().split("T")[0];
+    }
+  }
+
+  console.log("Formatted date string:", dateString);
+
+  return dateString;
+};
+
 const UserOccupation: React.FC<UserOccupationProps> = ({
-  occupations,
   isEdit,
   register,
   control,
@@ -38,7 +63,7 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
       )}
 
       {(fields ?? []).map((field, index: number) => {
-        const occupation = occupations?.[index] || {};
+        const occupation = field || {};
         return (
           <div key={index}>
             {index > 0 && <HR />}
@@ -57,13 +82,7 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                       {...register(`occupations.${index}.occupation` as const, {
                         required: true,
                       })}
-                      defaultValue={
-                        occupation.occupation === "Employed"
-                          ? "0"
-                          : occupation.occupation === "Unemployed"
-                          ? "1"
-                          : occupation.occupation || ""
-                      }
+                      defaultValue={occupation.occupation}
                       color={
                         errors?.[index]?.occupation ? "failure" : undefined
                       }
@@ -83,7 +102,7 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                     htmlFor={`occupation-${index}`}
                     className="font-normal"
                   >
-                    {occupation.occupation || ""}
+                    {occupation.occupation ? "Employed" : "Unemployed" || ""}
                   </Label>
                 )}
               </div>
@@ -95,14 +114,13 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                 </div>
                 {isEdit ? (
                   <>
-                    <TextInput
+                    <Datepicker
                       id={`from-${index}`}
-                      type="date"
-                      required
-                      defaultValue={occupation.from || ""}
                       {...register(`occupations.${index}.from` as const, {
                         required: "From date is required",
+                        setValueAs: (value) => formatDateString(value),
                       })}
+                      
                       color={errors?.[index]?.from ? "failure" : undefined}
                     />
                     {errors?.[index]?.from && (
@@ -113,7 +131,7 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                   </>
                 ) : (
                   <Label htmlFor={`from-${index}`} className="font-normal">
-                    {occupation.from || ""}
+                    {formatDateString(occupation.from) || ""}
                   </Label>
                 )}
               </div>

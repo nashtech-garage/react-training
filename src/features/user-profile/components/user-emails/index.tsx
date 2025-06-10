@@ -12,13 +12,11 @@ interface Email {
 interface UserEmailsProps {
   isEdit: boolean;
   register: UseFormRegister<FormData>;
-  emails?: Email[];
   control: any;
   errors: any;
 }
 
 const UserEmails: React.FC<UserEmailsProps> = ({
-  emails,
   isEdit,
   register,
   control,
@@ -38,7 +36,7 @@ const UserEmails: React.FC<UserEmailsProps> = ({
       )}
 
       {(fields ?? []).map((field, index: number) => {
-        const email = emails?.[index] || {};
+        const email = field || {};
         return (
           <div key={index}>
             {index > 0 && <HR />}
@@ -60,11 +58,7 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                       {...register(
                         `emails.${index}.email` as `emails.${number}.email`
                       )}
-                      color={
-                        errors?.[index]?.email
-                          ? "failure"
-                          : undefined
-                      }
+                      color={errors?.[index]?.email ? "failure" : undefined}
                     />
                     {errors?.[index]?.email && (
                       <Label className="text-red-600 text-sm mt-1">
@@ -73,10 +67,7 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                     )}
                   </>
                 ) : (
-                  <Label
-                    htmlFor={`email-${index}`}
-                    className="font-normal"
-                  >
+                  <Label htmlFor={`email-${index}`} className="font-normal">
                     {email.email || ""}
                   </Label>
                 )}
@@ -95,16 +86,8 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                       {...register(
                         `emails.${index}.type` as `emails.${number}.type`
                       )}
-                      defaultValue={
-                        email.type === "Work"
-                          ? "1"
-                          : email.type === "Personal"
-                          ? "0"
-                          : email.type || ""
-                      }
-                      color={
-                        errors?.[index]?.type ? "failure" : undefined
-                      }
+                      defaultValue={email.type === "0" ? "Personal" : "Work"}
+                      color={errors?.[index]?.type ? "failure" : undefined}
                     >
                       <option value="">Select type</option>
                       <option value="0">Personal</option>
@@ -121,7 +104,7 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                     htmlFor={`type-email-${index}`}
                     className="font-normal"
                   >
-                    {email.type || ""}
+                    {email.type === "0" ? "Personal" : "Work"}
                   </Label>
                 )}
               </div>
@@ -138,18 +121,14 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                       required
                       {...register(`emails.${index}.preferred` as const)}
                       defaultValue={
-                        email.preferred === true || email.preferred === "true"
-                          ? "true"
-                          : "false"
+                        email.preferred === 1 || email.preferred === "1"
+                          ? "1"
+                          : "0"
                       }
-                      color={
-                        errors?.[index]?.preferred
-                          ? "failure"
-                          : undefined
-                      }
+                      color={errors?.[index]?.preferred ? "failure" : undefined}
                     >
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
                     </Select>
                     {errors?.[index]?.preferred && (
                       <Label className="text-red-600 text-sm mt-1">
@@ -159,7 +138,7 @@ const UserEmails: React.FC<UserEmailsProps> = ({
                   </>
                 ) : (
                   <Label htmlFor={`preferred-${index}`} className="font-normal">
-                    {email.preferred === true || email.preferred === "true"
+                    {email.preferred === 1 || email.preferred === "1"
                       ? "Yes"
                       : "No"}
                   </Label>
