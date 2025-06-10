@@ -101,6 +101,7 @@ const ProfileForm = () => {
     handleSubmit,
     control,
     formState: { errors },
+    reset,
   } = useForm<FormData>({ resolver: yupResolver(schema) });
 
   const authenticatedData = useStore((state) => state.userData);
@@ -146,6 +147,7 @@ const ProfileForm = () => {
       });
       const { data } = await response.json();
       setUserData(data);
+      reset(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
