@@ -8,7 +8,7 @@ import {
   HR,
   Datepicker,
 } from "flowbite-react"; // Replace with your actual imports
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, Controller } from "react-hook-form";
 import type { UseFormRegister } from "react-hook-form";
 
 interface Occupation {
@@ -34,11 +34,12 @@ const formatDateString = (date) => {
       parsedDate = date;
     }
     if (parsedDate && !isNaN(parsedDate.getTime())) {
-      dateString = parsedDate.toISOString().split("T")[0];
+      const adjustedDate = new Date(
+        parsedDate.getTime() - parsedDate.getTimezoneOffset() * 60000
+      );
+      dateString = adjustedDate.toISOString().split("T")[0];
     }
   }
-
-  console.log("Formatted date string:", dateString);
 
   return dateString;
 };
@@ -114,14 +115,24 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                 </div>
                 {isEdit ? (
                   <>
-                    <Datepicker
-                      id={`from-${index}`}
-                      {...register(`occupations.${index}.from` as const, {
+                    <Controller
+                      name={`occupations.${index}.from`}
+                      control={control}
+                      rules={{
                         required: "From date is required",
-                        setValueAs: (value) => formatDateString(value),
-                      })}
-                      
-                      color={errors?.[index]?.from ? "failure" : undefined}
+                      }}
+                      render={({ field }) => (
+                        <Datepicker
+                          id={`from-${index}`}
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onChange={(date) =>
+                            field.onChange(date.toISOString())
+                          }
+                          color={errors?.[index]?.from ? "failure" : undefined}
+                        />
+                      )}
                     />
                     {errors?.[index]?.from && (
                       <Label className="text-red-600 text-sm mt-1">
@@ -141,12 +152,24 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                 </div>
                 {isEdit ? (
                   <>
-                    <TextInput
-                      id={`to-${index}`}
-                      type="date"
-                      defaultValue={occupation.to || ""}
-                      {...register(`occupations.${index}.to` as const)}
-                      color={errors?.[index]?.to ? "failure" : undefined}
+                    <Controller
+                      name={`occupations.${index}.to`}
+                      control={control}
+                      rules={{
+                        required: "To date is required",
+                      }}
+                      render={({ field }) => (
+                        <Datepicker
+                          id={`to-${index}`}
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onChange={(date) =>
+                            field.onChange(date.toISOString())
+                          }
+                          color={errors?.[index]?.from ? "failure" : undefined}
+                        />
+                      )}
                     />
                     {errors?.[index]?.to && (
                       <Label className="text-red-600 text-sm mt-1">
@@ -156,7 +179,7 @@ const UserOccupation: React.FC<UserOccupationProps> = ({
                   </>
                 ) : (
                   <Label htmlFor={`to-${index}`} className="font-normal">
-                    {occupation.to || ""}
+                   {formatDateString(occupation.to) || ""}
                   </Label>
                 )}
               </div>

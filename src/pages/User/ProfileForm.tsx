@@ -61,6 +61,7 @@ interface Occupation {
 }
 
 interface FormData {
+  user: any[];
   email: string;
   firstname: string;
   middlename?: string;
@@ -100,34 +101,35 @@ const ProfileForm = () => {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
     reset,
   } = useForm<FormData>({ resolver: yupResolver(schema) });
 
   const authenticatedData = useStore((state) => state.userData);
   const isOfficer = authenticatedData?.isofficer || false;
-  const [userData, setUserData] = useState<FormData | null>(null);
   const [isEdit, setIsEdit] = useState(false);
   const [isLoading, setLoading] = useState(true);
 
   const onSubmit = async (data: FormData) => {
-    console.log("Submitting data:", data);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}u/profile`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-      throw new Error("Failed to submit data");
+        throw new Error("Failed to submit data");
       }
 
       const { message } = await response.json();
       console.log("Data submitted successfully:", message);
+      alert("Profile updated successfully!");
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting user data:", error);
     }
@@ -146,7 +148,6 @@ const ProfileForm = () => {
         },
       });
       const { data } = await response.json();
-      setUserData(data);
       reset(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -189,7 +190,8 @@ const ProfileForm = () => {
           </div>
 
           <UserBasicInfoSection
-            userData={userData ?? {}}
+            // userData={userData ?? {}}
+            watch={watch}
             isEdit={isEdit}
             register={register}
             control={control}
@@ -217,7 +219,6 @@ const ProfileForm = () => {
           />
 
           <UserIdentifications
-            identifications={userData?.identifications || []}
             isEdit={isEdit}
             register={register}
             control={control}
@@ -233,14 +234,14 @@ const ProfileForm = () => {
 
           {isEdit && (
             <div className="flex justify-end mt-4 gap-2">
-              <Button
+              {/* <Button
                 pill
                 color="alternative"
                 type="submit"
                 onClick={handleSubmit(onSubmit)}
               >
                 Cancel
-              </Button>
+              </Button> */}
               <Button
                 pill
                 color="green"
