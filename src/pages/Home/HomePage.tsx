@@ -7,15 +7,12 @@ import Breadcrumb from "../../components/Breadcrumb/index.tsx";
 import { UserTable } from "../../features/user-list/components/user-table/index.tsx";
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const userData = useStore((state) => state.userData);
-  console.log("User Data:", userData);
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
     // Check if the user is authorized before fetching data
     if (!userData.isofficer) {
-      console.log("User not authorized to fetch data");
       return;
     }
 
@@ -45,7 +42,6 @@ const HomePage = () => {
 
     // If you need to perform cleanup when component unmounts
     return () => {
-      console.log("Component unmounting, cleaning up");
     };
   }, []);
 

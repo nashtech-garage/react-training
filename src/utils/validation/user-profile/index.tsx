@@ -37,13 +37,11 @@ export const basicInfoValidationSchema = yup.object({
     .typeError("Invalid date format")
     // .required("Date of birth is required")
     .test("is-adult", "You must be at least 18 years old", (value) => {
-      console.log("age", value);
       if (!value) return false;
       const today = new Date();
       const birthDate = new Date(value);
       const age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      console.log("age", age);
       return (
         age > 18 ||
         (age === 18 && monthDiff >= 0 && today.getDate() >= birthDate.getDate())
@@ -88,7 +86,6 @@ export const occupationsValidationSchema = yup.object().shape({
     .typeError("Invalid date format")
     .required("Start date is required")
     .test("is-valid-date", "Start date must be a valid date", (value) => {
-      console.log("from", value);
       return value instanceof Date && !isNaN(value.getTime());
     }),
   to: yup

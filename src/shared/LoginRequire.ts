@@ -8,7 +8,6 @@ export async function requireAuth(request: Request): Promise<boolean | Boolean |
   });
 
   const response = await status.json();
-  console.log("Response from auth status:", !response.success);
 
   if (!response.success) {
     const url = new URL(request.url);

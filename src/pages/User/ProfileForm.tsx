@@ -1,15 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import {
-  Card,
-  Label,
-  TextInput,
-  Button,
-  Select,
-  HRTrimmed,
-} from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useStore } from "../../shared";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/Breadcrumb/index.tsx";
 import UserBasicInfoSection from "../../features/user-profile/components/user-basic/index.tsx";
 import UserAddressSection from "../../features/user-profile/components/user-address/index.tsx";
@@ -96,7 +89,6 @@ const schema = yup.object().shape({
 
 const ProfileForm = ({ userId }) => {
   const navigate = useNavigate();
-  const params = useParams();
   const {
     register,
     handleSubmit,
@@ -109,7 +101,6 @@ const ProfileForm = ({ userId }) => {
   const authenticatedData = useStore((state) => state.userData);
   const isOfficer = authenticatedData?.isofficer || false;
   const [isEdit, setIsEdit] = useState(false);
-  const [isLoading, setLoading] = useState(true);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -126,8 +117,7 @@ const ProfileForm = ({ userId }) => {
         throw new Error("Failed to submit data");
       }
 
-      const { message } = await response.json();
-      console.log("Data submitted successfully:", message);
+      await response.json();
       alert("Profile updated successfully!");
       window.location.reload();
     } catch (error) {
@@ -136,7 +126,7 @@ const ProfileForm = ({ userId }) => {
   };
 
   const goToKYC = () => {
-    navigate(`/pages/users/${params.id}/kyc`);
+    navigate(`/pages/users/kyc`);
   };
 
   const fetchUserData = async () => {
@@ -161,15 +151,15 @@ const ProfileForm = ({ userId }) => {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [userId]);
 
   return (
     <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
       <div className="mb-4 col-span-full xl:mb-2">
         <Breadcrumb
           items={[
-            { label: "Users", href: "/pages/users" },
-            { label: "Profile", href: `/pages/users/${params.id}` },
+            { label: "Users", href: "/pages/home" },
+            { label: "Profile" },
           ]}
         />
         <form className="flex flex-col gap-4" noValidate>
@@ -187,7 +177,7 @@ const ProfileForm = ({ userId }) => {
                 >
                   {isEdit ? "Cancel" : "Edit"}
                 </Button>
-                <Button pill color="alternative">
+                <Button pill color="alternative" onClick={goToKYC}>
                   KYC
                 </Button>
               </div>
@@ -195,13 +185,11 @@ const ProfileForm = ({ userId }) => {
           </div>
 
           <UserBasicInfoSection
-            // userData={userData ?? {}}
             watch={watch}
             isEdit={isEdit}
             register={register}
             control={control}
             errors={errors.user || {}}
-            isLoading={isLoading}
           />
           <UserAddressSection
             isEdit={isEdit}
@@ -239,14 +227,6 @@ const ProfileForm = ({ userId }) => {
 
           {isEdit && (
             <div className="flex justify-end mt-4 gap-2">
-              {/* <Button
-                pill
-                color="alternative"
-                type="submit"
-                onClick={handleSubmit(onSubmit)}
-              >
-                Cancel
-              </Button> */}
               <Button
                 pill
                 color="green"

@@ -20,7 +20,6 @@ const UserPhones: React.FC<UserPhonesProps> = ({
     control,
     name: "numbers",
   });
-  console.log(fields);
   return (
     <Card className="my-3">
       <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">

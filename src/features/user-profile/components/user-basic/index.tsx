@@ -10,7 +10,6 @@ type UserBasicInfoProps = {
   control: any;
   errors: any;
   watch: any;
-  isLoading: boolean;
 };
 
 const formatDateString = (date) => {
@@ -34,13 +33,11 @@ const formatDateString = (date) => {
 };
 
 const UserBasicInfoSection: React.FC<UserBasicInfoProps> = ({
-  // userData,
   watch,
   isEdit,
   register,
   control,
   errors,
-  isLoading,
 }) => {
   const user = watch("user");
   return (

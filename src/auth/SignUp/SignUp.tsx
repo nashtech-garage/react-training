@@ -145,10 +145,8 @@ const SignUp = () => {
           }),
         })
           .then(async (res) => {
-            console.log(res.ok);
             if (!res.ok) {
               const errorData = await res.json();
-              console.log(errorData);
               throw new Error(
                 JSON.stringify(errorData) || "Failed to create user"
               );
@@ -164,7 +162,6 @@ const SignUp = () => {
             errorData = JSON.parse(errorData.message || "{}");
             console.error("Error creating account:", errorData);
             // If the error response contains field errors, map them to formData.errors
-            console.log(errorData);
             if (errorData && Array.isArray(errorData.errors)) {
               const apiErrors: Record<string, string> = {};
               errorData.errors.forEach(
@@ -185,7 +182,6 @@ const SignUp = () => {
               }));
             }
           });
-        console.log("Validation successful", formData);
       })
       .catch((err) => {
         const errors: Record<string, string> = {};
@@ -514,7 +510,6 @@ const SignUp = () => {
               </Label>
               <a
                 onClick={() => {
-                  console.log("Terms clicked");
                   setOpenModal(true);
                 }}
                 className="text-primary-700 hover:underline dark:text-primary-500 cursor-pointer"

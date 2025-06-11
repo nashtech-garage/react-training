@@ -2,6 +2,7 @@ import { Navigate, type RouteObject } from "react-router-dom";
 import UserPage from "./UserPage.tsx";
 import UserKYCPage from "./UserKYCPage.tsx";
 import UserProfilePage from "./UserProfilePage.tsx";
+import { pageLoader } from "../../pages/Admin/AdminRoute.tsx";
 
 const userRoutes: RouteObject[] = [
   {
@@ -10,9 +11,15 @@ const userRoutes: RouteObject[] = [
     children: [
       { path: "", element: <Navigate to="list" replace /> },
       { path: "profile", element: <UserProfilePage /> },
-      { path: ":id/kyc", element: <UserKYCPage /> },
-      // { path: ":id/edit", element: <UserProfilePage /> },
-      { path: ":id/details", element: <UserProfilePage /> },
+      {
+        path: "kyc",
+        element: <UserKYCPage />,
+      },
+      {
+        path: ":id/details",
+        element: <UserProfilePage />,
+        loader: pageLoader,
+      },
     ],
   },
 ];
