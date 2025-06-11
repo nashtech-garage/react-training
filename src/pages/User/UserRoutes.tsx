@@ -11,7 +11,7 @@ const userRoutes: RouteObject[] = [
       { path: "", element: <Navigate to="list" replace /> },
       { path: "profile", element: <UserProfilePage /> },
       { path: ":id/kyc", element: <UserKYCPage /> },
-      { path: ":id/edit", element: <UserProfilePage /> },
+      // { path: ":id/edit", element: <UserProfilePage /> },
       { path: ":id/details", element: <UserProfilePage /> },
     ],
   },

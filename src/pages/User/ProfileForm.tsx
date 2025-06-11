@@ -94,7 +94,7 @@ const schema = yup.object().shape({
   identifications: yup.array().of(identificationsValidationSchema),
 });
 
-const ProfileForm = () => {
+const ProfileForm = ({ userId }) => {
   const navigate = useNavigate();
   const params = useParams();
   const {
@@ -141,12 +141,17 @@ const ProfileForm = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}u/profile`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}u/profile${
+          userId !== undefined ? "/" + userId : ""
+        }`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       const { data } = await response.json();
       reset(data);
     } catch (error) {

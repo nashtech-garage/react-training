@@ -3,7 +3,6 @@ import AdminPage from './AdminPage.tsx';
 import { requireStaff } from '../../shared/StaffRequire.ts';
 
 async function pageLoader({request}: { request: Request }) {
-    console.log(123123);
     const res = await requireStaff(request);
     return res ? res : null;
 }
