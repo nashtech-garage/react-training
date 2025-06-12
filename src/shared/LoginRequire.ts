@@ -1,18 +1,23 @@
-export async function requireAuth(request: Request): Promise<boolean | Boolean | null | Response> {
-  // return null;
-  const status = await fetch(`${import.meta.env.VITE_API_URL}u/status`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export function requireAuth(request: Request): Response | null {
+    // return null;
+    const cookie = request.headers.get("Cookie");
+    const token = parseTokenFromCookie(cookie);
 
-  const response = await status.json();
+    if (!token) {
+        const url = new URL(request.url);
+        return Response.redirect(`/auth/login?redirectTo=${url.pathname}`, 302);
+    }
 
-  if (!response.success) {
-    const url = new URL(request.url);
-    return Response.redirect(`/auth/login?redirectTo=${url.pathname}`, 302);
-  }
+    return null;
+}
 
-  return false;
+function parseTokenFromCookie(cookieHeader: string | null): string | null {
+    if (!cookieHeader) return null;
+    const cookies = Object.fromEntries(
+        cookieHeader.split(';').map(c => {
+            const [key, ...v] = c.trim().split('=');
+            return [key, v.join('=')];
+        })
+    );
+    return cookies["token"] || null;
 }
