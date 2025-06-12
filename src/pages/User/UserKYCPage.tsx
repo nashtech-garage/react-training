@@ -1,10 +1,9 @@
-import KycForm from "./KycForm.tsx";
-import { useParams } from "react-router-dom";
+import KycForm from './KycForm.tsx';
 
 const UserKYCPage = () => {
-  // Get the id parameter from the URL
-  const { id } = useParams<{ id: string }>();
-  return <KycForm userId={id} />;
-};
+    return (<>
+        <KycForm/>
+    </>)
+}
 
-export default UserKYCPage;
+export default UserKYCPage
