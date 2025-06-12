@@ -10,7 +10,7 @@ import adminRoutes from './Admin/AdminRoute.tsx';
 import productRoutes from './Products/ProductRoutes.tsx';
 
 export async function pageLoader({request}: { request: Request }) {
-    const res = requireAuth(request);
+    const res = await requireAuth(request);
     return res ? res : null;
 }
 
@@ -27,7 +27,7 @@ const pageRoutes: RouteObject[] = [
             { path: 'home', element: <HomePage /> },
             { path: '', element: <Navigate to="home" replace /> },
         ]
-    }
+    },
 ]
 
 export default pageRoutes;
