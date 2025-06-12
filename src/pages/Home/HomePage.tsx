@@ -70,8 +70,8 @@ const HomePage = () => {
           </div>
         </>
       ) : (
-        <p className="text-center text-red-500 mt-10">
-          You are not authorized to view this page.
+        <p className="text-center text-white mt-10">
+          Hello Guest!
         </p>
       )}
     </React.Fragment>

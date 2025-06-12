@@ -16,7 +16,7 @@ const Investments: React.FC<InvestmentsProps> = ({
   control,
   errors,
 }) => {
-  const investment = watch("investment");
+  const investments = watch("investments");
   return (
     <Card className="my-3">
       <h5 className="font-bold tracking-tight text-sky-900 dark:text-white">
@@ -32,9 +32,9 @@ const Investments: React.FC<InvestmentsProps> = ({
               <Select
                 className="w-sm"
                 id={`experience`}
-                {...register(`investment?.experience` as const)}
+                {...register(`investments.experience` as const)}
                 color={errors?.experience ? "failure" : undefined}
-                defaultValue={investment?.experience}
+                defaultValue={investments?.experience}
               >
                 <option value="0">{"<"} 5 years</option>
                 <option value="1">{"> 5 and < 10 years"}</option>
@@ -48,11 +48,11 @@ const Investments: React.FC<InvestmentsProps> = ({
             </>
           ) : (
             <Label htmlFor={`experience`} className="font-normal">
-              {investment?.experience === "0"
+              {investments?.experience === "0"
                 ? "< 5 years"
-                : investment?.experience === "1"
+                : investments?.experience === "1"
                 ? "> 5 and < 10 years"
-                : investment?.experience === "2"
+                : investments?.experience === "2"
                 ? "> 10 years"
                 : ""}
             </Label>
@@ -67,9 +67,9 @@ const Investments: React.FC<InvestmentsProps> = ({
               <Select
                 className="w-sm"
                 id={`risk`}
-                {...register(`investment?.risk` as const)}
+                {...register(`investments.risk` as const)}
                 color={errors?.risk ? "failure" : undefined}
-                defaultValue={investment?.risk}
+                defaultValue={investments?.risk}
               >
                 <option value="0">10%</option>
                 <option value="1">30%</option>
@@ -81,11 +81,11 @@ const Investments: React.FC<InvestmentsProps> = ({
             </>
           ) : (
             <Label htmlFor={`risk`} className="font-normal">
-              {investment?.risk === "0"
+              {investments?.risk === "0"
                 ? "10%"
-                : investment?.risk === "1"
+                : investments?.risk === "1"
                 ? "30%"
-                : investment?.risk === "2"
+                : investments?.risk === "2"
                 ? "All-in"
                 : ""}
             </Label>

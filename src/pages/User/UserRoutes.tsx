@@ -16,6 +16,11 @@ const userRoutes: RouteObject[] = [
         element: <UserKYCPage />,
       },
       {
+        path: ":id/kyc",
+        loader: pageLoader,
+        element: <UserKYCPage />,
+      },
+      {
         path: ":id/details",
         element: <UserProfilePage />,
         loader: pageLoader,

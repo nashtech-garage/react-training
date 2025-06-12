@@ -34,7 +34,7 @@ const schema = yup.object().shape({
   sourceofwealths: yup.array().of(sourceOfWealthValidationSchema),
 });
 
-const KycForm = ({ userId }) => {
+const KycForm = ({ userId }: { userId?: string }) => {
   const {
     register,
     handleSubmit,
@@ -47,8 +47,29 @@ const KycForm = ({ userId }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [totalNetWorth, setTotalNetWorth] = useState("0");
   const isOfficer = useStore((state) => state.userData?.isofficer || false);
-  const onSubmit = (data: FormData) => {
-    console.log("Form submitted:", data);
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}u/kyc`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setIsEdit(false);
+        alert("KYC information saved successfully");
+        fetchKycData(); // Refresh data
+      } else {
+        alert(`Failed to save: ${result.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error submitting KYC data:", error);
+      alert("Failed to save KYC information. Please try again.");
+    }
   };
 
   const calculateTotal = () => {
@@ -113,6 +134,7 @@ const KycForm = ({ userId }) => {
       );
       const { data } = await response.json();
       reset(data);
+      calculateTotal();
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -120,6 +142,8 @@ const KycForm = ({ userId }) => {
   useEffect(() => {
     fetchKycData();
   }, [userId]);
+
+  const kyc = watch("kycs");
   return (
     <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
       <div className="mb-4 col-span-full xl:mb-2">
@@ -152,7 +176,9 @@ const KycForm = ({ userId }) => {
             control={control}
             errors={{}}
           />
-          <Status status={"3"} />
+          <Status
+            status={(kyc && Object.keys(kyc).length) > 0 ? kyc.status : "3"}
+          />
           <div className="flex flex-wrap gap-2 justify-between align-center">
             <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white inline-flex self-center">
               Financial status

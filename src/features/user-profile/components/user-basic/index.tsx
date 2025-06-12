@@ -12,6 +12,27 @@ type UserBasicInfoProps = {
   watch: any;
 };
 
+// Function to calculate age from date of birth
+const calculateAge = (dateOfBirth: string | Date | undefined): number => {
+  if (!dateOfBirth) return 0;
+
+  const dob = dateOfBirth instanceof Date ? dateOfBirth : new Date(dateOfBirth);
+
+  // Return 0 if invalid date
+  if (isNaN(dob.getTime())) return 0;
+
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+
+  // Adjust age if birthday hasn't occurred yet this year
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
 const formatDateString = (date) => {
   let dateString = "";
   let parsedDate: Date | null = null;
@@ -184,7 +205,7 @@ const UserBasicInfoSection: React.FC<UserBasicInfoProps> = ({
             <Label htmlFor="age">Age</Label>
           </div>
           <Label className="font-normal" htmlFor="age">
-            {user?.age || ""}
+            {calculateAge(user?.dateofbirth) || ""}
           </Label>
         </div>
         <div className="flex-2">

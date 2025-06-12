@@ -12,12 +12,14 @@ interface StatusProps {
   status: KYCStatus;
   className?: string;
   showLabel?: boolean;
+  showStatus?: boolean;
 }
 
 const Status: React.FC<StatusProps> = ({
   status,
   className = "",
   showLabel = true,
+  showStatus = true,
 }) => {
   const getStatusConfig = () => {
     switch (status) {
@@ -30,17 +32,17 @@ const Status: React.FC<StatusProps> = ({
         };
       case "1":
         return {
-          color: "failure",
-          icon: () => <HiOutlineExclamationCircle size={16} />,
-          text: "Rejected",
-          description: "KYC verification has been rejected",
-        };
-      case "2":
-        return {
           color: "info",
           icon: () => <CiClock1 size={16} />,
           text: "Pending",
           description: "KYC verification is being processed",
+        };
+      case "2":
+        return {
+          color: "failure",
+          icon: () => <HiOutlineExclamationCircle size={16} />,
+          text: "Rejected",
+          description: "KYC verification has been rejected",
         };
       case "3":
       default:
@@ -58,7 +60,9 @@ const Status: React.FC<StatusProps> = ({
   return (
     <Tooltip content={config.description}>
       <div className={`kyc-status ${className} flex items-center w-full my-3`}>
-        <h5 className="text-black dark:text-white mr-2">Status:</h5>
+        {showStatus && (
+          <h5 className="text-black dark:text-white mr-2">Status:</h5>
+        )}
         <Badge color={config.color as any} icon={config.icon}>
           {showLabel ? config.text : ""}
         </Badge>
